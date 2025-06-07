@@ -1,0 +1,36 @@
+name: Rclone Alist Mount
+version: 1.0.2
+slug: rclone_alist_mount
+description: Mounts an Alist server to a local disk using rclone
+url: "https://github.com/yourusername/my-rclone-alist-addon"
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+init: false
+map:
+  - media:rw
+  - share:rw
+hassio_api: true
+homeassistant_api: true
+host_pid: true
+privileged:
+  - SYS_ADMIN
+  - DAC_READ_SEARCH
+devices:
+  - /dev/fuse:/dev/fuse:rwm
+options:
+  alist_url: "http://your-alist-server:5244/dav"
+  alist_username: "admin"
+  alist_password: ""
+  mount_point: "/media/alist"
+  rclone_config: ""
+schema:
+  alist_url: str
+  alist_username: str
+  alist_password: password
+  mount_point: str
+  rclone_config: str?
+image: "ghcr.io/{owner}/rclone-alist-mount-{arch}"
