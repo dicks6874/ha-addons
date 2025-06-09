@@ -46,25 +46,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Start rclone mount
+# Start rclone mount in foreground for debugging
 echo "Mounting WebDAV remote to ${MOUNT_POINT}"
 /usr/bin/rclone mount webdav: "${MOUNT_POINT}" \
     --vfs-cache-mode writes \
     --dir-cache-time 5m \
     --vfs-read-ahead 128M \
     --allow-other \
-    --daemon
+    --log-level DEBUG
 
-# Wait briefly to ensure the mount starts
-sleep 5
-
-# Check if the mount is active
-if mount | grep "${MOUNT_POINT}"; then
-    echo "Mount successful"
-else
-    echo "ERROR: Mount failed"
-    exit 1
-fi
-
-# Keep the script running to prevent container from exiting
-tail -f /dev/null
+# No need for tail -f since mount runs in foreground
