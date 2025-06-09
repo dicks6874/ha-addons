@@ -1,37 +1,34 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 
-# Read configuration from add-on options
-ALIST_URL=$(jq -r '.alist_url' /data/options.json)
-ALIST_USERNAME=$(jq -r '.alist_username' /data/options.json)
-ALIST_PASSWORD=$(jq -r '.alist_password' /data/options.json)
-MOUNT_POINT=$(jq -r '.mount_point' /data/options.json)
-RCLONE_CONFIG=$(jq -r '.rclone_config' /data/options.json)
-
-# Create rclone config directory
-mkdir -p /root/.config/rclone
+# Read configuration from Home Assistant options
+WEBDAV_URL=$(jq --raw-output '.webdav_url' /data/options.json)
+WEBDAV_USER=$(jq --raw-output '.webdav_user' /data/options.json)
+WEBDAV_PASS=$(jq --raw-output '.webdav_pass' /data/options.json)
+MOUNT_POINT=$(jq --raw-output '.mount_point' /data/options.json)
+VENDOR=$(jq --raw-output '.vendor // "other"' /data/options.json)
 
 # Create mount point if it doesn't exist
 mkdir -p "${MOUNT_POINT}"
 
-# Create rclone configuration file
-if [ -n "${RCLONE_CONFIG}" ]; then
-    echo "${RCLONE_CONFIG}" > /root/.config/rclone/rclone.conf
-else
-    cat << EOF > /root/.config/rclone/rclone.conf
-[alist]
+# Create rclone.conf
+cat > /root/.config/rclone/rclone.conf <<EOF
+[webdav]
 type = webdav
-url = ${ALIST_URL}
-vendor = other
-user = ${ALIST_USERNAME}
-pass = ${ALIST_PASSWORD}
+url = ${WEBDAV_URL}
+vendor = ${VENDOR}
+user = ${WEBDAV_USER}
+pass = $(rclone obscure "${WEBDAV_PASS}")
 EOF
-fi
 
-# Mount the Alist server
-rclone mount alist: "${MOUNT_POINT}" \
-    --allow-other \
+# Start rclone mount
+echo "Mounting WebDAV remote to ${MOUNT_POINT}"
+/usr/bin/rclone mount webdav: "${MOUNT_POINT}" \
     --vfs-cache-mode writes \
+    --dir-cache-time 5m \
+    --vfs-read-ahead 128M \
+    --allow-other \
     --daemon
 
-# Keep the container running
+# Keep the script running to prevent container from exiting
 tail -f /dev/null
