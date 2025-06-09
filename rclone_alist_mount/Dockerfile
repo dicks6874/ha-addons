@@ -4,6 +4,7 @@ FROM $BUILD_FROM
 
 # Install dependencies
 RUN apk add --no-cache \
+    fuse \
     fuse3 \
     ca-certificates \
     wget \
@@ -12,7 +13,8 @@ RUN apk add --no-cache \
     && unzip rclone-current-linux-amd64.zip \
     && mv rclone-*-linux-amd64/rclone /usr/bin/ \
     && rm -rf rclone-*-linux-amd64 rclone-current-linux-amd64.zip \
-    && chmod +x /usr/bin/rclone
+    && chmod +x /usr/bin/rclone \
+    && ln -s /usr/bin/fusermount3 /usr/bin/fusermount || true
 
 # Copy run script
 COPY run.sh /run.sh
