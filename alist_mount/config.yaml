@@ -1,5 +1,5 @@
 name: AList WebDAV Mount
-version: 1.0.2
+version: 1.0.3
 slug: alist_webdav_mount
 description: Mounts an AList WebDAV share to a local directory using davfs2
 url: https://github.com/your-repo/alist-webdav-mount

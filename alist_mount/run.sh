@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Debug FUSE availability
+echo "Debug: Checking /dev/fuse"
+ls -l /dev/fuse || echo "Error: /dev/fuse not found"
+modprobe fuse || echo "Error: Failed to load fuse module"
+mount -t fuse -o ro /dev/null /tmp/test 2>&1 || echo "Error: FUSE test mount failed"
+
 # Read configuration from HAOS add-on options
 WEBDAV_URL=$(jq -r '.webdav_url' /data/options.json)
 USERNAME=$(jq -r '.username' /data/options.json)
@@ -11,7 +17,6 @@ if [ -z "$WEBDAV_URL" ] || [ "$WEBDAV_URL" = "null" ]; then
   echo "Error: webdav_url is not set or invalid in /data/options.json"
   exit 1
 fi
-# Basic URL validation (checks for http:// or https://)
 if ! echo "$WEBDAV_URL" | grep -qE '^https?://'; then
   echo "Error: webdav_url ($WEBDAV_URL) is not a valid URL. It must start with http:// or https://"
   exit 1
@@ -43,7 +48,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Create secrets file with quoted credentials to handle special characters
+# Create secrets file with quoted credentials
 echo "\"$WEBDAV_URL\" \"$USERNAME\" \"$PASSWORD\"" > /etc/davfs2/secrets
 chmod 600 /etc/davfs2/secrets
 if [ $? -ne 0 ]; then
