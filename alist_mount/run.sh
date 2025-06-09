@@ -45,9 +45,13 @@ user = $USERNAME
 pass = $(echo -n "$PASSWORD" | rclone obscure -)
 EOF
 
+# Debug: Show rclone config (masking password)
+echo "Debug: rclone config"
+cat /root/.config/rclone/rclone.conf | grep -v pass
+
 # Debug: Test WebDAV connection
 echo "Debug: Testing WebDAV connection to $WEBDAV_URL"
-rclone lsd webdav:/ --user "$USERNAME" --pass "$PASSWORD"
+rclone lsd webdav:/
 if [ $? -ne 0 ]; then
   echo "Error: Failed to list directory at $WEBDAV_URL. Check URL, credentials, or directory path."
   exit 1
