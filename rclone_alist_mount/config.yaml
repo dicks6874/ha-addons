@@ -1,7 +1,7 @@
-name: Rclone WebDAV Mount
+name: Rclone WebDAV Server
 version: "1.0.0"
-slug: rclone_webdav_mount
-description: Mount a WebDAV remote to a local directory using Rclone
+slug: rclone_webdav_server
+description: Serve a WebDAV remote as a local WebDAV server using Rclone
 url: https://github.com/yourusername/hassio-rclone-webdav-mount
 arch:
   - amd64
@@ -24,8 +24,6 @@ schema:
   webdav_pass: password
   mount_point: str
   vendor: list(other|nextcloud|owncloud|sharepoint|fastmail)?
-host_network: false
-privileged:
-  - SYS_ADMIN
-devices:
-  - /dev/fuse
+host_network: true
+ports:
+  "8080/tcp": 8080

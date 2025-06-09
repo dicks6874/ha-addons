@@ -8,9 +8,6 @@ WEBDAV_PASS=$(jq --raw-output '.webdav_pass' /data/options.json)
 MOUNT_POINT=$(jq --raw-output '.mount_point' /data/options.json)
 VENDOR=$(jq --raw-output '.vendor // "other"' /data/options.json)
 
-# Create mount point if it doesn't exist
-mkdir -p "${MOUNT_POINT}"
-
 # Create Rclone config directory and set permissions
 echo "Creating Rclone config directory..."
 mkdir -p /root/.config/rclone
@@ -46,17 +43,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Check FUSE setup
-echo "Checking FUSE setup..."
-ls -l /dev/fuse || echo "ERROR: /dev/fuse not found"
-which fusermount3 || echo "ERROR: fusermount3 not found"
-modprobe fuse || echo "WARNING: modprobe fuse failed"
-
-# Start rclone mount in foreground for debugging
-echo "Mounting WebDAV remote to ${MOUNT_POINT}"
-/usr/bin/rclone mount webdav: "${MOUNT_POINT}" \
+# Start rclone serve webdav
+echo "Starting WebDAV server on port 8080..."
+/usr/bin/rclone serve webdav webdav: \
+    --addr :8080 \
+    --user "${WEBDAV_USER}" \
+    --pass "${WEBDAV_PASS}" \
     --vfs-cache-mode writes \
     --dir-cache-time 5m \
-    --vfs-read-ahead 128M \
-    --allow-other \
     --log-level DEBUG
