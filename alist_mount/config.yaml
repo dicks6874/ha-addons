@@ -1,5 +1,5 @@
 name: AList STRM Serve
-version: 1.0.11
+version: 1.0.13
 slug: alist_strm_serve
 description: Generates .strm files from AList WebDAV .mp4 files and serves them over HTTP using rclone
 url: https://github.com/your-repo/alist-strm-serve
@@ -13,7 +13,7 @@ init: false
 startup: application
 boot: auto
 options:
-  webdav_url: "http://192.168.0.142:5244/dav/OneDriveShare"
+  webdav_url: "http://192.168.0.142:5244/dav"
   username: ""
   password: ""
   alist_api_url: "http://192.168.0.142:5244/api"

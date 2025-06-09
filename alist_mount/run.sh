@@ -69,8 +69,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Generate .strm files for .mp4 files
-echo "Debug: Listing .mp4 files in webdav:/"
-rclone lsjson webdav:/ --include "*.mp4" | jq -r '.[] | .Path' | while read -r file; do
+echo "Debug: Listing .mp4 files in webdav:/OneDriveShare"
+rclone lsjson webdav:/OneDriveShare --include "*.mp4" | jq -r '.[] | .Path' | while read -r file; do
   STRM_FILE="$STRM_DIR/${file%.mp4}.strm"
   mkdir -p "$(dirname "$STRM_FILE")"
   # Get streaming URL from AList API
