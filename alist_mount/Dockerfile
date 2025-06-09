@@ -1,13 +1,12 @@
 FROM alpine:3.18
 
-# Install wdfs, fuse, jq, and dependencies
-RUN apk add --no-cache fuse bash jq \
- && apk add --no-cache --virtual .build-deps build-base neon-dev fuse-dev \
- && wget https://github.com/janvda/wdfs/archive/refs/tags/1.3.3.tar.gz \
- && tar -xzf 1.3.3.tar.gz \
- && cd wdfs-1.3.3 \
- && ./configure && make && make install \
- && cd .. && rm -rf wdfs-1.3.3 1.3.3.tar.gz \
+# Install rclone, jq, and dependencies
+RUN apk add --no-cache bash jq \
+ && apk add --no-cache --virtual .build-deps curl \
+ && curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip \
+ && unzip rclone-current-linux-amd64.zip \
+ && mv rclone-*/rclone /usr/bin/ \
+ && rm -rf rclone-current-linux-amd64.zip rclone-* \
  && apk del .build-deps
 
 # Create mount point directory

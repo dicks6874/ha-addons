@@ -1,8 +1,8 @@
-name: AList WebDAV Mount
-version: 1.0.3
-slug: alist_webdav_mount
-description: Mounts an AList WebDAV share to a local directory using davfs2
-url: https://github.com/your-repo/alist-webdav-mount
+name: AList WebDAV Sync
+version: 1.0.4
+slug: alist_webdav_sync
+description: Syncs an AList WebDAV share to a local directory using rclone
+url: https://github.com/your-repo/alist-webdav-sync
 arch:
   - aarch64
   - amd64
@@ -24,8 +24,4 @@ schema:
   mount_point: str
 map:
   - data:rw
-devices:
-  - /dev/fuse:/dev/fuse:rwm
-cap_add:
-  - SYS_ADMIN
 host_network: true

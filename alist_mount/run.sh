@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Debug FUSE availability
-echo "Debug: Checking /dev/fuse"
-ls -l /dev/fuse || echo "Error: /dev/fuse not found"
-modprobe fuse || echo "Error: Failed to load fuse module"
-mount -t fuse -o ro /dev/null /tmp/test 2>&1 || echo "Error: FUSE test mount failed"
-
 # Read configuration from HAOS add-on options
 WEBDAV_URL=$(jq -r '.webdav_url' /data/options.json)
 USERNAME=$(jq -r '.username' /data/options.json)
@@ -41,32 +35,24 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Create davfs2 configuration directory
-mkdir -p /etc/davfs2
+# Configure rclone
+cat << EOF > /root/.config/rclone/rclone.conf
+[webdav]
+type = webdav
+url = $WEBDAV_URL
+vendor = other
+user = $USERNAME
+pass = $(echo -n "$PASSWORD" | rclone obscure -)
+EOF
+
+# Sync WebDAV to local directory
+rclone sync webdav:/ "$MOUNT_POINT" --progress
 if [ $? -ne 0 ]; then
-  echo "Error: Failed to create /etc/davfs2 directory"
+  echo "Error: Failed to sync $WEBDAV_URL to $MOUNT_POINT with rclone"
   exit 1
 fi
 
-# Create secrets file with quoted credentials
-echo "\"$WEBDAV_URL\" \"$USERNAME\" \"$PASSWORD\"" > /etc/davfs2/secrets
-chmod 600 /etc/davfs2/secrets
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to create or set permissions for /etc/davfs2/secrets"
-  exit 1
-fi
-
-# Configure davfs2 to avoid locking issues
-echo "use_locks 0" >> /etc/davfs2/davfs2.conf
-
-# Mount the WebDAV share
-mount -t davfs -o rw,uid=0,gid=0 "$WEBDAV_URL" "$MOUNT_POINT"
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to mount $WEBDAV_URL to $MOUNT_POINT"
-  exit 1
-fi
-
-echo "Successfully mounted $WEBDAV_URL to $MOUNT_POINT"
+echo "Successfully synced $WEBDAV_URL to $MOUNT_POINT"
 
 # Keep the container running
 tail -f /dev/null
