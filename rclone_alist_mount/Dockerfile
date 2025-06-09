@@ -4,9 +4,10 @@ FROM $BUILD_FROM
 
 # Install dependencies
 RUN apk add --no-cache \
-    fuse \
+    fuse3 \
     ca-certificates \
     wget \
+    jq \
     && wget -q https://downloads.rclone.org/rclone-current-linux-amd64.zip \
     && unzip rclone-current-linux-amd64.zip \
     && mv rclone-*-linux-amd64/rclone /usr/bin/ \
