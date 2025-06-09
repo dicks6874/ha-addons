@@ -4,7 +4,10 @@
 WEBDAV_URL=$(jq -r '.webdav_url' /data/options.json)
 USERNAME=$(jq -r '.username' /data/options.json)
 PASSWORD=$(jq -r '.password' /data/options.json)
+ALIST_API_URL=$(jq -r '.alist_api_url // "http://192.168.0.142:5244/api"' /data/options.json)
+ALIST_TOKEN=$(jq -r '.alist_token' /data/options.json)
 SERVE_PORT=$(jq -r '.serve_port // "8080"' /data/options.json)
+STRM_DIR="/data/strm"
 
 # Validate configuration
 if [ -z "$WEBDAV_URL" ] || [ "$WEBDAV_URL" = "null" ]; then
@@ -23,9 +26,24 @@ if [ -z "$PASSWORD" ] || [ "$PASSWORD" = "null" ]; then
   echo "Error: password is not set or invalid in /data/options.json"
   exit 1
 fi
+if [ -z "$ALIST_API_URL" ] || [ "$ALIST_API_URL" = "null" ]; then
+  echo "Error: alist_api_url is not set or invalid in /data/options.json"
+  exit 1
+fi
+if [ -z "$ALIST_TOKEN" ] || [ "$ALIST_TOKEN" = "null" ]; then
+  echo "Error: alist_token is not set or invalid in /data/options.json"
+  exit 1
+fi
 if [ -z "$SERVE_PORT" ] || [ "$SERVE_PORT" = "null" ]; then
   echo "Error: serve_port is not set or invalid in /data/options.json. Defaulting to 8080"
   SERVE_PORT="8080"
+fi
+
+# Create STRM directory
+mkdir -p "$STRM_DIR"
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to create STRM directory $STRM_DIR"
+  exit 1
 fi
 
 # Configure rclone
@@ -50,24 +68,38 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Debug: List .strm files in OneDriveShare
-echo "Debug: Listing .strm files in webdav:/OneDriveShare"
-rclone ls webdav:/OneDriveShare --include "*.strm"
-if [ $? -ne 0 ]; then
-  echo "Warning: No .strm files found or error listing files in OneDriveShare."
-fi
+# Generate .strm files for .mp4 files
+echo "Debug: Listing .mp4 files in webdav:/"
+rclone lsjson webdav:/ --include "*.mp4" | jq -r '.[] | .Path' | while read -r file; do
+  STRM_FILE="$STRM_DIR/${file%.mp4}.strm"
+  mkdir -p "$(dirname "$STRM_FILE")"
+  # Get streaming URL from AList API
+  echo "Debug: Fetching streaming URL for $file"
+  API_PATH="/OneDriveShare/$file"
+  STREAM_URL=$(curl -s -H "Authorization: Bearer $ALIST_TOKEN" "$ALIST_API_URL/fs/get?path=$API_PATH" | jq -r '.data.raw_url // empty')
+  if [ -z "$STREAM_URL" ]; then
+    echo "Warning: Failed to get streaming URL for $file"
+    continue
+  fi
+  echo "$STREAM_URL" > "$STRM_FILE"
+  echo "Generated $STRM_FILE"
+done
 
-# Serve WebDAV share over HTTP
-echo "Serving $WEBDAV_URL on port $SERVE_PORT"
-rclone serve webdav webdav:/OneDriveShare --addr :$SERVE_PORT --read-only --user "$USERNAME" --pass "$PASSWORD" &
+# Debug: List generated .strm files
+echo "Debug: Listing .strm files in $STRM_DIR"
+ls -l "$STRM_DIR"
+
+# Serve STRM directory over HTTP
+echo "Serving $STRM_DIR on port $SERVE_PORT"
+rclone serve http "$STRM_DIR" --addr :$SERVE_PORT --read-only &
 SERVE_PID=$!
 sleep 5
 if ! ps -p $SERVE_PID > /dev/null; then
-  echo "Error: Failed to serve $WEBDAV_URL on port $SERVE_PORT with rclone"
+  echo "Error: Failed to serve $STRM_DIR on port $SERVE_PORT with rclone"
   exit 1
 fi
 
-echo "Successfully serving $WEBDAV_URL on port $SERVE_PORT"
+echo "Successfully serving $STRM_DIR on port $SERVE_PORT"
 
 # Keep the container running
 tail -f /dev/null

@@ -1,8 +1,8 @@
-name: AList WebDAV Serve
-version: 1.0.9
-slug: alist_webdav_serve
-description: Serves an AList WebDAV share over HTTP using rclone
-url: https://github.com/your-repo/alist-webdav-serve
+name: AList STRM Serve
+version: 1.0.11
+slug: alist_strm_serve
+description: Generates .strm files from AList WebDAV .mp4 files and serves them over HTTP using rclone
+url: https://github.com/your-repo/alist-strm-serve
 arch:
   - aarch64
   - amd64
@@ -16,11 +16,15 @@ options:
   webdav_url: "http://192.168.0.142:5244/dav/OneDriveShare"
   username: ""
   password: ""
+  alist_api_url: "http://192.168.0.142:5244/api"
+  alist_token: ""
   serve_port: "8080"
 schema:
   webdav_url: str
   username: str
   password: password
+  alist_api_url: str
+  alist_token: str
   serve_port: str
 map:
   - data:rw
