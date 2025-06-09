@@ -17,4 +17,4 @@ COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
 # Set entrypoint
-ENTRYPOINT ["/run.sh"]
+ENTRYPOINT ["/run.sh"]ac

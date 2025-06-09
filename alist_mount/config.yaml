@@ -1,8 +1,8 @@
-name: AList WebDAV Mount
-version: 1.0.7
-slug: alist_webdav_mount
-description: Mounts an AList WebDAV share as a virtual filesystem using rclone
-url: https://github.com/your-repo/alist-webdav-mount
+name: AList WebDAV Serve
+version: 1.0.9
+slug: alist_webdav_serve
+description: Serves an AList WebDAV share over HTTP using rclone
+url: https://github.com/your-repo/alist-webdav-serve
 arch:
   - aarch64
   - amd64
@@ -16,15 +16,17 @@ options:
   webdav_url: "http://192.168.0.142:5244/dav/OneDriveShare"
   username: ""
   password: ""
-  mount_point: "/data/mount"
+  serve_port: "8080"
 schema:
   webdav_url: str
   username: str
   password: password
-  mount_point: str
+  serve_port: str
 map:
   - data:rw
 host_network: true
+ports:
+  8080/tcp: 8080
 cap_add:
   - SYS_ADMIN
   - DAC_OVERRIDE

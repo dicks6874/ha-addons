@@ -4,7 +4,7 @@
 WEBDAV_URL=$(jq -r '.webdav_url' /data/options.json)
 USERNAME=$(jq -r '.username' /data/options.json)
 PASSWORD=$(jq -r '.password' /data/options.json)
-MOUNT_POINT=$(jq -r '.mount_point' /data/options.json)
+SERVE_PORT=$(jq -r '.serve_port // "8080"' /data/options.json)
 
 # Validate configuration
 if [ -z "$WEBDAV_URL" ] || [ "$WEBDAV_URL" = "null" ]; then
@@ -23,16 +23,9 @@ if [ -z "$PASSWORD" ] || [ "$PASSWORD" = "null" ]; then
   echo "Error: password is not set or invalid in /data/options.json"
   exit 1
 fi
-if [ -z "$MOUNT_POINT" ] || [ "$MOUNT_POINT" = "null" ]; then
-  echo "Error: mount_point is not set or invalid in /data/options.json. Defaulting to /data/mount"
-  MOUNT_POINT="/data/mount"
-fi
-
-# Ensure mount point exists
-mkdir -p "$MOUNT_POINT"
-if [ $? -ne 0 ]; then
-  echo "Error: Failed to create mount point directory $MOUNT_POINT"
-  exit 1
+if [ -z "$SERVE_PORT" ] || [ "$SERVE_PORT" = "null" ]; then
+  echo "Error: serve_port is not set or invalid in /data/options.json. Defaulting to 8080"
+  SERVE_PORT="8080"
 fi
 
 # Configure rclone
@@ -64,17 +57,17 @@ if [ $? -ne 0 ]; then
   echo "Warning: No .strm files found or error listing files in OneDriveShare."
 fi
 
-# Mount WebDAV share as read-only
-echo "Mounting $WEBDAV_URL to $MOUNT_POINT"
-rclone mount webdav:/ "$MOUNT_POINT" --read-only --vfs-cache-mode off --allow-other --log-level INFO &
-MOUNT_PID=$!
+# Serve WebDAV share over HTTP
+echo "Serving $WEBDAV_URL on port $SERVE_PORT"
+rclone serve webdav webdav:/OneDriveShare --addr :$SERVE_PORT --read-only --user "$USERNAME" --pass "$PASSWORD" &
+SERVE_PID=$!
 sleep 5
-if ! ps -p $MOUNT_PID > /dev/null; then
-  echo "Error: Failed to mount $WEBDAV_URL to $MOUNT_POINT with rclone"
+if ! ps -p $SERVE_PID > /dev/null; then
+  echo "Error: Failed to serve $WEBDAV_URL on port $SERVE_PORT with rclone"
   exit 1
 fi
 
-echo "Successfully mounted $WEBDAV_URL to $MOUNT_POINT"
+echo "Successfully serving $WEBDAV_URL on port $SERVE_PORT"
 
 # Keep the container running
 tail -f /dev/null
