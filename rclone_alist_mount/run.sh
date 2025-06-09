@@ -38,6 +38,14 @@ else
     exit 1
 fi
 
+# Test WebDAV connection
+echo "Testing WebDAV connection..."
+/usr/bin/rclone lsd webdav: --max-depth 1
+if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to connect to WebDAV server"
+    exit 1
+fi
+
 # Start rclone mount
 echo "Mounting WebDAV remote to ${MOUNT_POINT}"
 /usr/bin/rclone mount webdav: "${MOUNT_POINT}" \
