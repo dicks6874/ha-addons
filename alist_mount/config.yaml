@@ -1,5 +1,5 @@
 name: AList WebDAV Mount
-version: 1.0.6
+version: 1.0.7
 slug: alist_webdav_mount
 description: Mounts an AList WebDAV share as a virtual filesystem using rclone
 url: https://github.com/your-repo/alist-webdav-mount
@@ -25,3 +25,6 @@ schema:
 map:
   - data:rw
 host_network: true
+cap_add:
+  - SYS_ADMIN
+  - DAC_OVERRIDE

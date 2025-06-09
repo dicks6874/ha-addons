@@ -57,14 +57,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Mount WebDAV share as read-only
-rclone mount webdav:/ "$MOUNT_POINT" --read-only --vfs-cache-mode off --allow-other --daemon --log-level INFO
+# Debug: List files in OneDriveShare
+echo "Debug: Listing files in webdav:/"
+rclone ls webdav:/ --include "*.strm"
 if [ $? -ne 0 ]; then
-  echo "Error: Failed to mount $WEBDAV_URL to $MOUNT_POINT with rclone"
-  exit 1
+  echo "Warning: No .strm files found or error listing files."
 fi
 
-echo "Successfully mounted $WEBDAV_URL to $MOUNT_POINT"
-
-# Keep the container running
-tail -f /dev/null
+# Mount WebDAV share as read-only
+echo "Mounting $WEBDAV_URL to $MOUNT_POINT"
+r
