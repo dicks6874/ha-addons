@@ -1,8 +1,8 @@
-name: AList WebDAV Sync
-version: 1.0.4
-slug: alist_webdav_sync
-description: Syncs an AList WebDAV share to a local directory using rclone
-url: https://github.com/your-repo/alist-webdav-sync
+name: AList WebDAV Mount
+version: 1.0.6
+slug: alist_webdav_mount
+description: Mounts an AList WebDAV share as a virtual filesystem using rclone
+url: https://github.com/your-repo/alist-webdav-mount
 arch:
   - aarch64
   - amd64
@@ -13,7 +13,7 @@ init: false
 startup: application
 boot: auto
 options:
-  webdav_url: "http://192.168.0.142:5244/dav"
+  webdav_url: "http://192.168.0.142:5244/dav/OneDriveShare"
   username: ""
   password: ""
   mount_point: "/data/mount"

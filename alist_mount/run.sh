@@ -45,14 +45,22 @@ user = $USERNAME
 pass = $(echo -n "$PASSWORD" | rclone obscure -)
 EOF
 
-# Sync WebDAV to local directory
-rclone sync webdav:/ "$MOUNT_POINT" --progress
+# Debug: Test WebDAV connection
+echo "Debug: Testing WebDAV connection to $WEBDAV_URL"
+rclone lsd webdav:/ --user "$USERNAME" --pass "$PASSWORD"
 if [ $? -ne 0 ]; then
-  echo "Error: Failed to sync $WEBDAV_URL to $MOUNT_POINT with rclone"
+  echo "Error: Failed to list directory at $WEBDAV_URL. Check URL, credentials, or directory path."
   exit 1
 fi
 
-echo "Successfully synced $WEBDAV_URL to $MOUNT_POINT"
+# Mount WebDAV share as read-only
+rclone mount webdav:/ "$MOUNT_POINT" --read-only --vfs-cache-mode off --allow-other --daemon --log-level INFO
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to mount $WEBDAV_URL to $MOUNT_POINT with rclone"
+  exit 1
+fi
+
+echo "Successfully mounted $WEBDAV_URL to $MOUNT_POINT"
 
 # Keep the container running
 tail -f /dev/null
