@@ -1,5 +1,5 @@
 name: AList WebDAV Mount
-version: 1.0.0
+version: 1.0.2
 slug: alist_webdav_mount
 description: Mounts an AList WebDAV share to a local directory using davfs2
 url: https://github.com/your-repo/alist-webdav-mount
@@ -13,7 +13,7 @@ init: false
 startup: application
 boot: auto
 options:
-  webdav_url: "https://your-alist-server/remote.php/webdav/"
+  webdav_url: "http://192.168.0.142:5244/dav"
   username: ""
   password: ""
   mount_point: "/data/mount"
@@ -24,3 +24,8 @@ schema:
   mount_point: str
 map:
   - data:rw
+devices:
+  - /dev/fuse:/dev/fuse:rwm
+cap_add:
+  - SYS_ADMIN
+host_network: true

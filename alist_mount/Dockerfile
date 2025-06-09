@@ -1,14 +1,14 @@
 FROM alpine:3.18
 
-# Instalar davfs2, jq y dependencias
-RUN apk add --no-cache davfs2 bash jq
+# Install davfs2, fuse, jq, and dependencies
+RUN apk add --no-cache davfs2 fuse bash jq
 
-# Crear el directorio del punto de montaje
+# Create mount point directory
 RUN mkdir -p /data/mount
 
-# Copiar el script de ejecución
+# Copy run script
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
-# Establecer el punto de entrada
+# Set entrypoint
 ENTRYPOINT ["/run.sh"]
