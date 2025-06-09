@@ -46,6 +46,12 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Check FUSE setup
+echo "Checking FUSE setup..."
+ls -l /dev/fuse || echo "ERROR: /dev/fuse not found"
+which fusermount3 || echo "ERROR: fusermount3 not found"
+modprobe fuse || echo "WARNING: modprobe fuse failed"
+
 # Start rclone mount in foreground for debugging
 echo "Mounting WebDAV remote to ${MOUNT_POINT}"
 /usr/bin/rclone mount webdav: "${MOUNT_POINT}" \
@@ -54,5 +60,3 @@ echo "Mounting WebDAV remote to ${MOUNT_POINT}"
     --vfs-read-ahead 128M \
     --allow-other \
     --log-level DEBUG
-
-# No need for tail -f since mount runs in foreground
