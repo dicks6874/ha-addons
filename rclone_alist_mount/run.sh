@@ -11,6 +11,9 @@ VENDOR=$(jq --raw-output '.vendor // "other"' /data/options.json)
 # Create mount point if it doesn't exist
 mkdir -p "${MOUNT_POINT}"
 
+# Create Rclone config directory
+mkdir -p /root/.config/rclone
+
 # Create rclone.conf
 cat > /root/.config/rclone/rclone.conf <<EOF
 [webdav]
