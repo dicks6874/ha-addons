@@ -1,0 +1,6 @@
+[webdav]
+type = webdav
+url = https://example.com/remote.php/webdav/
+vendor = nextcloud
+user = your_username
+pass = *** ENCRYPTED ***
